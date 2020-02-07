@@ -1,0 +1,1 @@
+./compile.x ; ./example.exe
