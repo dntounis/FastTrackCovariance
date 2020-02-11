@@ -34,7 +34,11 @@ public:
 	//
 	// READ/WRITE covariance list
 	void Write(TString fname, SolGeom *G);		// Write covariance list to file
-	void Read (TString fname);					// Read covariance list from file
+	void Read (TString fname);			// Read covariance list from file
+
+	void Init (SolGeom *G);				// Initialize Cov matrix without having to write a a ROOT file
+
+
 	//
 	// Covariance interpolation
 	Double_t GetMinPt()	{ return fPta(0); }

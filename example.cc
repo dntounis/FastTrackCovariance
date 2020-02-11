@@ -17,11 +17,9 @@ using namespace std;
 // - input Covariance Matrix in root file form
 // 
 // - provide vector position at origin, and vector momentum
-//
-
-
 
 int main() {
+
 
   // initialize Geometry
   SolGeom *G = new SolGeom();
@@ -32,11 +30,21 @@ int main() {
   // initialize tracking resolution
   SolGridCov *GC = new SolGridCov();
 
+  GC->Write("test.root",G);
+  GC->Read("test.root");
+
+  
+  GC->GetCov(20.33, 11.111);
+
+  // takes a while to write geometry file
+  // GC->Write("test.root",G);
+
   // reads covariance array
-  GC->Read("CovIDEA-BASE.root");
+  //GC->Read("CovIDEA-BASE.root");
 
   // apply track Resolution
 
+  /*
   TVector3 tX(0., 0., 0.);
   TLorentzVector p4;
   Double_t pt = 10.;
@@ -53,6 +61,8 @@ int main() {
   ObsTrk *Tr = new ObsTrk(tX, tP1, Q1, Bfield, GC);
 
   TVector3 obsP1 = Tr->GetObsP();
+  TVector3 obsX1 = Tr->GetObsX();
+  
   Double_t Eobs = TMath::Sqrt(m*m + obsP1.Mag2());
 
   TLorentzVector p4obs;
@@ -60,5 +70,5 @@ int main() {
 
   cout<<p4.Pt()<<","<<p4.Eta() <<","<<p4.Phi() <<","<<p4.E() <<endl;
   cout<<p4obs.Pt()<<","<<p4obs.Eta() <<","<<p4obs.Phi() <<","<<p4obs.E() <<endl;
-
+  */
 }

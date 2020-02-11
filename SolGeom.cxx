@@ -351,7 +351,7 @@ void SolGeom::SolGeoFill()
 		}
 	}
 	//
-	// DCH side wall	s
+	// DCH side walls
 	if (fEnable[3])
 	{
 		const Int_t nW = 2;
