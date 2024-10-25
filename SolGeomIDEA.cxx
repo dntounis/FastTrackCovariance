@@ -696,6 +696,7 @@ void SolGeom::Draw()
 			il++;
 		}
 	}
+	fcnv->SaveAs("Geometry_IDEA.png");
 }
 //
 Double_t SolGeom::StereoHyp(Double_t *x, Double_t *p)

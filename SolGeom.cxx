@@ -113,7 +113,7 @@ void SolGeom::SolGeoFill()
 	//
 	// Magnetic field
 	//
-	fB = 2.0;
+	fB = 5.0;
 	//===================================================================================
 	//		BARREL REGION
 	//===================================================================================
@@ -126,9 +126,9 @@ void SolGeom::SolGeoFill()
 		fLyLabl[fNlay] = "PIPE";
 		fxMin[fNlay] = -100.;		// Minimum dimension z for barrel  or R for forward
 		fxMax[fNlay] = 100.;		// Maximum dimension z for barrel  or R for forward
-		frPos[fNlay] = 0.015;		// R/z location of layer
-		fthLay[fNlay] = 0.001;		// Thickness (meters)
-		frlLay[fNlay] = 35.276e-2;	// Radiation length (meters)
+		frPos[fNlay] = 0.012;		// R/z location of layer (in meters)
+		fthLay[fNlay] = 0.0004;		// Thickness (meters)
+		frlLay[fNlay] = 35.28e-2;	// Radiation length (meters) //Jim: for Be - taken from https://pdg.lbl.gov/2022/AtomicNuclearProperties/HTML/beryllium_Be.html
 		fnmLay[fNlay] = 0;			// Number of measurements in layers (1D or 2D)
 		fstLayU[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
 		fstLayL[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
@@ -137,27 +137,34 @@ void SolGeom::SolGeoFill()
 		fflLay[fNlay] = kFALSE;		// measurement flag = T, scattering only = F
 		fNlay++; fBlay++;
 	}
+
+	
+
+
+
+
+
 	//
 	// Vertex  detector (inner)
 	if (fEnable[1])
 	{
-		const Int_t NlVtx = 3;	// Assume 3 vertex pixel layers
-		Double_t rVtx[NlVtx] = { 1.7, 2.3, 3.1 };		// Vertex layer radii in cm
-		Double_t lVtx[NlVtx] = { 11.0, 15.0, 20.0 };		// Vertex layer half length in cm
+		const Int_t NlVtx = 5;	// 5 vertex barrel pixel layers
+		Double_t rVtx[NlVtx] = { 1.4, 2.2, 3.5, 4.8, 6.0 };		// Vertex layer radii in cm
+		Double_t lVtx[NlVtx] = { 6.3,6.3,6.3,6.3,6.3 };		// Vertex layer half length in cm
 		for (Int_t i = 0; i < NlVtx; i++)
 		{
 			ftyLay[fNlay] = 1;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-			fLyLabl[fNlay] = "VTXLOW";			// Layer label
+			fLyLabl[fNlay] = "VTXBARREL";			// Layer label
 			fxMin[fNlay] = -lVtx[i] * 1.e-2;		// Minimum dimension z for barrel  or R for forward
 			fxMax[fNlay] = lVtx[i] * 1.e-2;	// Maximum dimension z for barrel  or R for forward
 			frPos[fNlay] = rVtx[i] * 1.e-2;	// R/z location of layer
-			fthLay[fNlay] = 280.E-6;			// Thickness (meters)
-			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
+			fthLay[fNlay] = 75.E-6;			// Thickness (meters) - see TDR 2.2.1: "All of these technologies have the capability of delivering sensors less than 75 µm thick"
+			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters) for Si: https://pdg.lbl.gov/2023/AtomicNuclearProperties/HTML/silicon_Si.html
 			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
 			fstLayU[fNlay] = 0;					// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
 			fstLayL[fNlay] = TMath::Pi() / 2.;		// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 4.E-6;				// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 4.E-6;				// Resolution Lower side (meters) - 0 = no measurement
+			fsgLayU[fNlay] = 5.E-6;				// Resolution Upper side (meters) - 0 = no measurement - see TDR 2.2.1: "All of these technologies have the capability of delivering sensors [..] with 5 µm hit resolution"
+			fsgLayL[fNlay] = 5.E-6;				// Resolution Lower side (meters) - 0 = no measurement - see TDR 2.2.1: "All of these technologies have the capability of delivering sensors [..] with 5 µm hit resolution"
 			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
 			fNlay++; fBlay++;
 			fNm++;
@@ -327,10 +334,10 @@ void SolGeom::SolGeoFill()
 	// Vertex disks
 	if (fEnable[6])
 	{
-		const Int_t NlVtxd = 8;							// Assume 8 pixel disk layers
-		Double_t zVtxd[NlVtxd] = { -92., -90., -42., -40., 40., 42., 90., 92. };		// z location in cm
-		Double_t rinVtxd[NlVtxd] = { 14.1, 13.8, 6.5, 6.2, 6.2, 6.5, 13.8, 14.1 };      // Lower radius in cm
-		Double_t rotVtxd = 30.0;			// Outer radius in cm
+		const Int_t NlVtxd = 8;							// Assume 8 pixel disk layers - 4 on each side
+		Double_t zVtxd[NlVtxd] = { -17.2, -12.3, -9.2, -7.2, 7.2,9.2, 12.3, 17.2};		// z location in cm
+		Double_t rinVtxd[NlVtxd] = { 2.0, 1.8, 1.6, 1.4, 1.4, 1.6, 1.8, 2.0};      // Lower radius in cm
+		Double_t rotVtxd = 7.1;			// Outer radius in cm
 		for (Int_t i = 0; i < NlVtxd; i++)
 		{
 			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward
@@ -343,8 +350,8 @@ void SolGeom::SolGeoFill()
 			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
 			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
 			fstLayL[fNlay] = TMath::Pi() / 2.;	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 10.E-6;			// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 10.E-6;			// Resolution Lower side (meters) - 0 = no measurement
+			fsgLayU[fNlay] = 5.E-6;			// Resolution Upper side (meters) - 0 = no measurement
+			fsgLayL[fNlay] = 5.E-6;			// Resolution Lower side (meters) - 0 = no measurement
 			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
 			fNlay++; fFlay++;
 			fNm++;
