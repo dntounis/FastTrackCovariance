@@ -628,7 +628,7 @@ void SolGeom::Draw()
 	beam->SetLineStyle(9);
 	beam->Draw("SAME");
 	// Magnet
-	TPave *sol = new TPave(-2.5, 2.2, 2.5, 2.3, 0, "");
+	TPave *sol = new TPave(-2.793, 2.731, 2.793, 2.731+0.381, 0, ""); //Jim: change to SiD solenoid dimensions
 	sol->SetFillColor(30);
 	sol->Draw("SAME");
 	//
@@ -655,6 +655,9 @@ void SolGeom::Draw()
 	bfCalor->SetFillColor(38);
 	bfCalor->SetLineColor(kBlack);
 	bfCalor->Draw("FSAME");
+
+
+	
 	// All other layers
 	// Measurement silicon (red), blue (DCH), scattering black
 	//
