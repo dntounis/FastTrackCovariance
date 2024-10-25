@@ -31,6 +31,7 @@ SolGeom::SolGeom()
 			}
 		}
 	}
+	for (Int_t i=0; i < k; i++)cout << "i = " << i << ", Detector = " << fDtype[i]<<endl;
 }
 //
 SolGeom::SolGeom(Bool_t *OK)
@@ -54,6 +55,7 @@ SolGeom::SolGeom(Bool_t *OK)
 			}
 		}
 	}
+	for (Int_t i=0; i < k; i++)cout << "i = " << i << ", Detector = " << fDtype[i]<<endl;
 }
 SolGeom::SolGeom(char *fname)
 {
@@ -76,10 +78,15 @@ SolGeom::SolGeom(char *fname)
 			}
 		}
 	}
+	for (Int_t i = 0; i < k; i++)cout << "i = " << i << ", Detector = " << fDtype[i] << endl;
 }
 
 void SolGeom::SolGeoInit()
 {
+	//
+	// Magnetic field
+	//
+	fB = 5.0;
 	//
 	// Create arrays
 	//
@@ -90,33 +97,31 @@ void SolGeom::SolGeoInit()
 	frPos = new Double_t[fNlMax];	// R/z location of layer
 	fthLay = new Double_t[fNlMax];	// Thickness (meters)
 	frlLay = new Double_t[fNlMax];	// Radiation length (meters)
-	fnmLay = new Int_t[fNlMax];	// Number of measurements in layers (1D or 2D)
+	fnmLay = new Int_t[fNlMax];		// Number of measurements in layers (1D or 2D)
 	fstLayU = new Double_t[fNlMax];	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
 	fstLayL = new Double_t[fNlMax];	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
 	fsgLayU = new Double_t[fNlMax];	// Resolution Upper side (meters) - 0 = no measurement
 	fsgLayL = new Double_t[fNlMax];	// Resolution Lower side (meters) - 0 = no measurement
-	fflLay = new Bool_t[fNlMax];		// measurement flag = T, scattering only = F
-	fEnable = new Bool_t[fNdet];		// list of enabled detectors
-	fDtype = new TString[fNdty];		// Array with layer labels 
-	fDfstLay = new Int_t[fNdty];		// Array with start layer
+	fflLay = new Bool_t[fNlMax];	// measurement flag = T, scattering only = F
+	fEnable = new Bool_t[fNdet];	// list of enabled detectors
+	fDtype = new TString[fNdty];	// Array with layer labels 
+	fDfstLay = new Int_t[fNdty];	// Array with start layer
 	//
 	// Load geometry info in SolGeom.h
 	//
 	fNlay = 0;	// Actual number of layers
 	fBlay = 0;	// Nr. of barrel layers
 	fFlay = 0;	// Nr. of forward/backward layers
-	fNm = 0;  // Nr. of measuring layers
+	fNm = 0;	// Nr. of measuring layers
 }
 	//
 void SolGeom::SolGeoFill()
 {
-	//
-	// Magnetic field
-	//
-	fB = 2.0;
 	//===================================================================================
 	//		BARREL REGION
 	//===================================================================================
+	//
+	Double_t R12 = TMath::Sqrt(12);
 	//
 	// Beam pipe
 	//
@@ -126,9 +131,9 @@ void SolGeom::SolGeoFill()
 		fLyLabl[fNlay] = "PIPE";
 		fxMin[fNlay] = -100.;		// Minimum dimension z for barrel  or R for forward
 		fxMax[fNlay] = 100.;		// Maximum dimension z for barrel  or R for forward
-		frPos[fNlay] = 0.015;		// R/z location of layer
-		fthLay[fNlay] = 0.001;		// Thickness (meters)
-		frlLay[fNlay] = 35.276e-2;	// Radiation length (meters)
+		frPos[fNlay] = 0.012;		// R/z location of layer (in meters)
+		fthLay[fNlay] = 0.0004;		// Thickness (meters)
+		frlLay[fNlay] = 35.276e-2;	// Radiation length (meters) //Jim: for Be - taken from https://pdg.lbl.gov/2022/AtomicNuclearProperties/HTML/beryllium_Be.html
 		fnmLay[fNlay] = 0;			// Number of measurements in layers (1D or 2D)
 		fstLayU[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
 		fstLayL[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
@@ -137,318 +142,316 @@ void SolGeom::SolGeoFill()
 		fflLay[fNlay] = kFALSE;		// measurement flag = T, scattering only = F
 		fNlay++; fBlay++;
 	}
+
+
+
+
 	//
 	// Vertex  detector (inner)
 	if (fEnable[1])
 	{
-		const Int_t NlVtx = 3;	// Assume 3 vertex pixel layers
-		Double_t rVtx[NlVtx] = { 1.7, 2.3, 3.1 };		// Vertex layer radii in cm
-		Double_t lVtx[NlVtx] = { 11.0, 15.0, 20.0 };		// Vertex layer half length in cm
+		const Int_t NlVtx = 5;	// 5 vertex barrel pixel layers
+		Double_t rVtx[NlVtx] = { 1.4, 2.2, 3.5, 4.8, 6.0 };		// Vertex layer radii in cm
+		Double_t lVtx[NlVtx] = { 6.3,6.3,6.3,6.3,6.3 };		// Vertex layer half length in cm
 		for (Int_t i = 0; i < NlVtx; i++)
 		{
 			ftyLay[fNlay] = 1;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-			fLyLabl[fNlay] = "VTXLOW";			// Layer label
+			fLyLabl[fNlay] = "VTX";			// Layer label
 			fxMin[fNlay] = -lVtx[i] * 1.e-2;		// Minimum dimension z for barrel  or R for forward
 			fxMax[fNlay] = lVtx[i] * 1.e-2;	// Maximum dimension z for barrel  or R for forward
 			frPos[fNlay] = rVtx[i] * 1.e-2;	// R/z location of layer
-			fthLay[fNlay] = 280.E-6;			// Thickness (meters)
-			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
+			fthLay[fNlay] = 50.E-6;			// Thickness (meters) - Jim: assume 50 microns thickness (ARCADIA/ATLASPIX3)
+			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters) for Si: https://pdg.lbl.gov/2023/AtomicNuclearProperties/HTML/silicon_Si.html
 			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
 			fstLayU[fNlay] = 0;					// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
 			fstLayL[fNlay] = TMath::Pi() / 2.;		// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 4.E-6;				// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 4.E-6;				// Resolution Lower side (meters) - 0 = no measurement
+			fsgLayU[fNlay] = 3.E-6;				// Resolution Upper side (meters) - 0 = no measurement - see TDR 2.2.1: "All of these technologies have the capability of delivering sensors [..] with 5 µm hit resolution"
+			fsgLayL[fNlay] = 3.E-6;				// Resolution Lower side (meters) - 0 = no measurement - see TDR 2.2.1: "All of these technologies have the capability of delivering sensors [..] with 5 µm hit resolution"
 			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
 			fNlay++; fBlay++;
 			fNm++;
 		}
-	}
-	//
-	// Vertex  detector (outer)
-	if (fEnable[2])
-	{
-		const Int_t NlVtxo = 2;	// Assume 2 vertex strip layers
-		Double_t rVtxo[NlVtxo] = { 32., 34. };			// Vertex layer radii in cm
-		Double_t lVtxo[NlVtxo] = { 211., 224.5 };		// Vertex layer half length in cm
-		for (Int_t i = 0; i < NlVtxo; i++)
+
+
+		// Describe associated material -- Jim: asume 0.1% X0 per layer, i.e. 93.7microns per layer
+		const Int_t NlVtxM = 5;
+
+		Double_t rVtxM[NlVtxM] = { 1.4+0.0050, 2.2+0.0050, 3.5+0.0050, 4.8+0.0050, 6.0+0.0050 };		// Vertex layer radii in cm -- Jim: assume r for vtx sensitive material above + sensor width of 50microns
+		Double_t lVtxM[NlVtxM] = { 6.3,6.3,6.3,6.3,6.3 };		// Vertex layer half length in cm
+		Double_t lThkM[NlVtxM] = { 43.7,43.7,43.7,43.7,43.7 };	// Layer thickness in um -- Jim: 93.7 - 50 = 43.7 microns for Si
+		for (Int_t i = 0; i < NlVtxM; i++)
 		{
 			ftyLay[fNlay] = 1;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-			fLyLabl[fNlay] = "VTXHIGH";			// Layer label
-			fxMin[fNlay] = -lVtxo[i] * 1.e-2;	// Minimum dimension z for barrel  or R for forward
-			fxMax[fNlay] = lVtxo[i] * 1.e-2;	// Maximum dimension z for barrel  or R for forward
-			frPos[fNlay] = rVtxo[i] * 1.e-2;	// R/z location of layer
-			fthLay[fNlay] = 470.E-6;			// Thickness (meters)
+			fLyLabl[fNlay] = "VTX";				// Layer label
+			fxMin[fNlay] = -lVtxM[i] * 1.e-2;	// Minimum dimension z for barrel  or R for forward
+			fxMax[fNlay] = lVtxM[i] * 1.e-2;	// Maximum dimension z for barrel  or R for forward
+			frPos[fNlay] = rVtxM[i] * 1.e-2;	// R/z location of layer
+			fthLay[fNlay] = lThkM[i] * 1.E-6;	// Thickness (meters)
 			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
-			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
-			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-			fstLayL[fNlay] = pow(-1, i)*1.2*TMath::Pi() / 180.;	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 10.E-6;				// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 10.E-6;				// Resolution Lower side (meters) - 0 = no measurement
-			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
+			fnmLay[fNlay] = 0;					// Number of measurements in layers (1D or 2D)
+			fstLayU[fNlay] = 0;					// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
+			fstLayL[fNlay] = 0;	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
+			fsgLayU[fNlay] = 0;				// Resolution Upper side (meters) - 0 = no measurement
+			fsgLayL[fNlay] = 0;				// Resolution Lower side (meters) - 0 = no measurement
+			fflLay[fNlay] = kFALSE;				// measurement flag = T, scattering only = F
 			fNlay++; fBlay++;
-			fNm++;
 		}
-	}
-	//
-	// Tracker inner can wall
-	//
-	if (fEnable[3])
-	{
-		ftyLay[fNlay] = 1;			// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-		fLyLabl[fNlay] = "DCHCANI";	// Layer label
-		fxMin[fNlay] = -2.125;		// Minimum dimension z for barrel  or R for forward
-		fxMax[fNlay] = 2.125;			// Maximum dimension z for barrel  or R for forward
-		frPos[fNlay] = 0.345;		// R/z location of layer
-		fthLay[fNlay] = 0.002;		// Thickness (meters)
-		frlLay[fNlay] = 23.72226e-2;	// Radiation length (meters)
-		fnmLay[fNlay] = 0;			// Number of measurements in layers (1D or 2D)
-		fstLayU[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-		fstLayL[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-		fsgLayU[fNlay] = 0.;			// Resolution Upper side (meters) - 0 = no measurement
-		fsgLayL[fNlay] = 0.;			// Resolution Lower side (meters) - 0 = no measurement
-		fflLay[fNlay] = kFALSE;		// measurement flag = T, scattering only = F
-		fNlay++; fBlay++;
-		//
-		// Drift chamber  detector
-		const Int_t NlDch = 112;			// Assume 112 DCH layers
-		Double_t sgDch = 100.E-6;		// Drift chamber resolution in m
-		Double_t rMin = frPos[fNlay - 1] + 1.5e-2;	// Min radius @ z = 2 meters
-		Double_t rMax = 2.0;						    // Max radius @ z = 2 meters
-		Double_t rStp = (rMax - rMin) / (Double_t)(NlDch - 1); // layer spacing
-		Double_t stAng = 13.*TMath::Pi() / 180.; // Stereo angle expressed as plate rotation angle
-		//
-		for (Int_t i = 0; i < NlDch; i++)
-		{
-			ftyLay[fNlay] = 1;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-			fLyLabl[fNlay] = "DCH";				// Layer label
-			fxMin[fNlay] = -2.;					// Minimum dimension z for barrel  or R for forward
-			fxMax[fNlay] = 2.;					// Maximum dimension z for barrel  or R for forward
-			frPos[fNlay] = rMin + i*rStp;		// R/z location of layer @ z = 0
-			fthLay[fNlay] = rStp;				// Thickness (meters)
-			frlLay[fNlay] = 500.;				// Radiation length (meters) - combination of gas and wires
-			fnmLay[fNlay] = 1;					// Number of measurements in layers (1D or 2D)
-			Double_t tgt = pow(-1, i) * 2 * frPos[fNlay] *
-				TMath::Sin(stAng / 2.) / (2 * fxMax[fNlay]);	// Stereo angle (rad)  - Upper side
-			fstLayU[fNlay] = TMath::ATan(tgt);
-			fstLayL[fNlay] = 0;					// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 100.E-6;			// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 0;					// Resolution Lower side (meters) - 0 = no measurement
-			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
-			fNlay++; fBlay++;
-			fNm++;
-		}
-		//
-		// Tracker outerer can wall
-		//
-		ftyLay[fNlay] = 1;			// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-		fLyLabl[fNlay] = "DCHCANO";	// Layer label
-		fxMin[fNlay] = -2.125;		// Minimum dimension z for barrel  or R for forward
-		fxMax[fNlay] = 2.125;			// Maximum dimension z for barrel  or R for forward
-		frPos[fNlay] = 2.02;		// R/z location of layer
-		fthLay[fNlay] = 0.02;		// Thickness (meters)
-		frlLay[fNlay] = 166.7e-2;	// Radiation length (meters)
-		fnmLay[fNlay] = 0;			// Number of measurements in layers (1D or 2D)
-		fstLayU[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-		fstLayL[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-		fsgLayU[fNlay] = 0.;			// Resolution Upper side (meters) - 0 = no measurement
-		fsgLayL[fNlay] = 0.;			// Resolution Lower side (meters) - 0 = no measurement
-		fflLay[fNlay] = kFALSE;		// measurement flag = T, scattering only = F
-		fNlay++; fBlay++;
-	}
-	//
-	// Silicon wrapper barrel region
-	//
-	if (fEnable[4])
-	{
-		const Int_t NlVtxw = 2;							// Assume 2 strip layers
-		Double_t rVtxw[NlVtxw] = { 204., 206. };			// Si wrapper layer radii in cm
-		Double_t lVtxw[NlVtxw] = { 240., 240. };			// Si wrapper layer half length in cm
-		for (Int_t i = 0; i < NlVtxw; i++)
-		{
-			ftyLay[fNlay] = 1;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-			fLyLabl[fNlay] = "BSILWRP";			// Layer label
-			fxMin[fNlay] = -lVtxw[i] * 1.e-2;	// Minimum dimension z for barrel  or R for forward
-			fxMax[fNlay] = lVtxw[i] * 1.e-2;		// Maximum dimension z for barrel  or R for forward
-			frPos[fNlay] = rVtxw[i] * 1.e-2;		// R/z location of layer
-			fthLay[fNlay] = 470.E-6;				// Thickness (meters)
-			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
-			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
-			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-			fstLayL[fNlay] = TMath::Pi() / 2.;	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 10.E-6;				// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 10.E-6;				// Resolution Lower side (meters) - 0 = no measurement
-			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
-			fNlay++; fBlay++;
-			fNm++;
-		}
-	}
-	//
-	// Magnet
-	//
-	ftyLay [fNlay] = 1;			// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-	fLyLabl[fNlay] = "MAG";		// Layer label
-	fxMin  [fNlay] = -2.5;		// Minimum dimension z for barrel  or R for forward
-	fxMax  [fNlay] = 2.5;		// Maximum dimension z for barrel  or R for forward
-	frPos  [fNlay] = 2.25;		// R/z location of layer
-	fthLay [fNlay] = 0.05;		// Thickness (meters)
-	frlLay [fNlay] = 6.58e-2;	// Radiation length (meters)
-	fnmLay [fNlay] = 0;			// Number of measurements in layers (1D or 2D)
-	fstLayU[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-	fstLayL[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-	fsgLayU[fNlay] = 0.;			// Resolution Upper side (meters) - 0 = no measurement
-	fsgLayL[fNlay] = 0.;			// Resolution Lower side (meters) - 0 = no measurement
-	fflLay [fNlay] = kFALSE;		// measurement flag = T, scattering only = F
-	fNlay++; fBlay++;
-	//
-	// Preshower
-	if (fEnable[5])
-	{
-		ftyLay[fNlay] = 1;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-		fLyLabl[fNlay] = "BPRESH";			// Layer label
-		fxMin[fNlay] = -2.55;				// Minimum dimension z for barrel  or R for forward
-		fxMax[fNlay] = 2.55;				// Maximum dimension z for barrel  or R for forward
-		frPos[fNlay] = 2.45;				// R/z location of layer
-		fthLay[fNlay] = .02;				// Thickness (meters)
-		frlLay[fNlay] = 100e-2;			// Radiation length (meters)
-		fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
-		fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-		fstLayL[fNlay] = TMath::Pi() / 2.;	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-		fsgLayU[fNlay] = 70.E-6;				// Resolution Upper side (meters) - 0 = no measurement
-		fsgLayL[fNlay] = 1.E-2;				// Resolution Lower side (meters) - 0 = no measurement
-		fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
-		fNlay++; fBlay++;
-		fNm++;
+
+
+
+
 	}
 
+
+	//
+	// Tracker
+	if (fEnable[2])
+	{
+		const Int_t NlTrki = 5;	// Assume 5 long pixel layers
+		Double_t rTrki[NlTrki] = { 21.95,46.95,71.95,96.95,121.95};		// Tracker layer radii in cm
+		Double_t lTrki[NlTrki] = { 111.6,147.3,200.1,251.8,304.5 };	// Tracker layer half length in cm
+		for (Int_t i = 0; i < NlTrki; i++)
+		{
+			ftyLay[fNlay] = 1;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
+			fLyLabl[fNlay] = "TRK";				// Layer label
+			fxMin[fNlay] = -lTrki[i] * 1.e-2;	// Minimum dimension z for barrel  or R for forward
+			fxMax[fNlay] = lTrki[i] * 1.e-2;	// Maximum dimension z for barrel  or R for forward
+			frPos[fNlay] = rTrki[i] * 1.e-2;	// R/z location of layer
+			fthLay[fNlay] = 100.E-6;			// Thickness (meters)-- Jim: assume 100microns
+			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters) -- Jim: Si
+			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
+			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0 = axial layer - Upper side
+			fstLayL[fNlay] = TMath::Pi() / 2.;	// Stereo angle (rad) - pi/2 = z layer - Lower side
+			fsgLayU[fNlay] = 7.E-6;				// Resolution Upper side (meters) - 0 = no measurement
+			fsgLayL[fNlay] = 7.E-6;			// Resolution Lower side (meters) - 0 = no measurement
+			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
+			fNlay++; fBlay++;
+			fNm++;
+		}
+		// Describe associated material -- Jim: asume 0.3% X0 per layer, i.e. 281 microns per layer
+		const Int_t NlTrkiM = 5;	// Assume 5 material layers
+		Double_t rTrkiM[NlTrkiM] = { 21.95+0.01,46.95+0.01,71.95+0.01,96.95+0.01,121.95+0.01 };	// Tracker layer radii in cm -- Jim: assume r for trk sensitive material above + sensor width of 100microns
+		Double_t lTrkiM[NlTrkiM] = { 111.6,147.3,200.1,251.8,304.5 };	// Tracker layer half length in cm
+		Double_t lThkiM[NlTrkiM] = { 181., 181.,181., 181., 181.};	// Layer thickness in um of Si -- Jim: 281 - 100 = 181 microns for Si
+		for (Int_t i = 0; i < NlTrkiM; i++)
+		{
+			ftyLay[fNlay] = 1;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
+			fLyLabl[fNlay] = "TRK";				// Layer label
+			fxMin[fNlay] = -lTrkiM[i] * 1.e-2;	// Minimum dimension z for barrel  or R for forward
+			fxMax[fNlay] = lTrkiM[i] * 1.e-2;	// Maximum dimension z for barrel  or R for forward
+			frPos[fNlay] = rTrkiM[i] * 1.e-2;	// R/z location of layer
+			fthLay[fNlay] = lThkiM[i] * 1.E-6;	// Thickness (meters)
+			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
+			fnmLay[fNlay] = 0;					// Number of measurements in layers (1D or 2D)
+			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0 = axial layer - Upper side
+			fstLayL[fNlay] = 0;				// Stereo angle (rad) - pi/2 = z layer - Lower side
+			fsgLayU[fNlay] = 0;				// Resolution Upper side (meters) - 0 = no measurement
+			fsgLayL[fNlay] = 0;				// Resolution Lower side (meters) - 0 = no measurement
+			fflLay[fNlay] = kFALSE;				// measurement flag = T, scattering only = F
+			fNlay++; fBlay++;
+		}
+	}
+	
+	//
 	//================================================================================================
 	//		FORWARD/BACKWARD
 	//================================================================================================
 	//
 	// Vertex disks
-	if (fEnable[6])
-	{
-		const Int_t NlVtxd = 8;							// Assume 8 pixel disk layers
-		Double_t zVtxd[NlVtxd] = { -92., -90., -42., -40., 40., 42., 90., 92. };		// z location in cm
-		Double_t rinVtxd[NlVtxd] = { 14.1, 13.8, 6.5, 6.2, 6.2, 6.5, 13.8, 14.1 };      // Lower radius in cm
-		Double_t rotVtxd = 30.0;			// Outer radius in cm
-		for (Int_t i = 0; i < NlVtxd; i++)
-		{
-			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward
-			fLyLabl[fNlay] = "VTXDSK";			// Layer label
-			fxMin[fNlay] = rinVtxd[i] * 1.e-2;	// Minimum dimension z for barrel  or R for forward
-			fxMax[fNlay] = rotVtxd * 1.e-2;	// Maximum dimension z for barrel  or R for forward
-			frPos[fNlay] = zVtxd[i] * 1.e-2;	// R/z location of layer
-			fthLay[fNlay] = 280.E-6;			// Thickness (meters)
-			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
-			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
-			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-			fstLayL[fNlay] = TMath::Pi() / 2.;	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 10.E-6;			// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 10.E-6;			// Resolution Lower side (meters) - 0 = no measurement
-			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
-			fNlay++; fFlay++;
-			fNm++;
-		}
-	}
-	//
-	// DCH side walls
 	if (fEnable[3])
 	{
-		const Int_t nW = 2;
-		for (Int_t i = 0; i < nW; i++)
+		const Int_t NlVtxd = 8;	// 4 vertex disks on each side
+		Double_t zVtxd[NlVtxd] = { -17.2, -12.3, -9.2, -7.2, 
+			                        7.2, 9.2, 12.3, 17.2};		// Vertex layer z in cm
+		Double_t riVtxd[NlVtxd] = { 2.0,1.8, 1.6, 1.4, 
+			                        1.4, 1.6, 1.8, 2.0};	// Vertex layer R min in cm
+		Double_t rοVtxd[NlVtxd] = { 7.1,7.1,7.1,7.1, 
+			                        7.1,7.1,7.1,7.1 };	// Vertex layer R max in cm
+
+		for (Int_t i = 0; i < NlVtxd; i++)
 		{
 			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-			fLyLabl[fNlay] = "DCHWALL";			// Layer label
-			fxMin[fNlay] = 34.5*1e-2;			// Minimum dimension z for barrel  or R for forward
-			fxMax[fNlay] = 202.0 * 1.e-2;		// Maximum dimension z for barrel  or R for forward
-			frPos[fNlay] = pow(-1, i)*212.5 * 1.e-2;	// R/z location of layer
-			fthLay[fNlay] = 25.E-2;				// Thickness (meters)
-			frlLay[fNlay] = 555.0e-2;			// Radiation length (meters)
-			fnmLay[fNlay] = 0;					// Number of measurements in layers (1D or 2D)
-			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-			fstLayL[fNlay] = 0;					// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 0;					// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 0;					// Resolution Lower side (meters) - 0 = no measurement
-			fflLay[fNlay] = kFALSE;				// measurement flag = T, scattering only = F
-			fNlay++; fFlay++;
-			fNm++;
-		}
-	}
-	//
-	// Forw/Backw. Si wrapper
-	if (fEnable[7])
-	{
-		const Int_t NlSid = 4;										// Assume 4 disk layers
-		Double_t zSid[NlSid] = { -232., -230., 230., 232. };		// z location in cm
-		Double_t rinSid[NlSid] = { 35.4, 35.0, 35.0, 35.4 };		// Lower radius in cm
-		Double_t rotSid = 202.0;										// Outer radius in cm
-		for (Int_t i = 0; i < NlSid; i++)
-		{
-			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-			fLyLabl[fNlay] = "FSILWRP";			// Layer label
-			fxMin[fNlay] = rinSid[i] * 1.e-2;	// Minimum dimension z for barrel  or R for forward
-			fxMax[fNlay] = rotSid * 1.e-2;	// Maximum dimension z for barrel  or R for forward
-			frPos[fNlay] = zSid[i] * 1.e-2;	// R/z location of layer
-			fthLay[fNlay] = 470.E-6;			// Thickness (meters)
+			fLyLabl[fNlay] = "VTXDSK";			// Layer label
+			fxMin[fNlay] = riVtxd[i] * 1.e-2;	// Minimum dimension R for forward disk
+			fxMax[fNlay] = rοVtxd[i] * 1.e-2;		// Maximum dimension R for forward disk
+ 			frPos[fNlay] = zVtxd[i] * 1.e-2;	// R/z location of layer
+			fthLay[fNlay] = 50.E-6;				// Thickness (meters) - Jim: assume 50 microns thickness (ARCADIA/ATLASPIX3)
 			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
 			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
-			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-			fstLayL[fNlay] = TMath::Pi() / 2.;	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 10.E-6;			// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 10.E-6;			// Resolution Lower side (meters) - 0 = no measurement
+			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0 = axial layer - Upper side
+			fstLayL[fNlay] = TMath::Pi() / 2.;	// Stereo angle (rad) - pi/2 = z layer - Lower side
+			fsgLayU[fNlay] = 3.E-6;				// Resolution Upper side (meters) - 0 = no measurement
+			fsgLayL[fNlay] = 3.E-6;			// Resolution Lower side (meters) - 0 = no measurement
 			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
 			fNlay++; fFlay++;
 			fNm++;
+		}
+		// Describe associated material -- Jim: asume 0.1% X0 per layer, i.e. 93.7microns per layer
+		const Int_t NlVtxdM = 8;	// 4 vertex disks on each side
+		Double_t zVtxdM[NlVtxdM] =  { -17.2-0.005, -12.3-0.005, -9.2-0.005, -7.2-0.005, 
+			                           7.2+0.005, 9.2+0.005, 12.3+0.005, 17.2+0.005};	// Material layer z in cm -- Jim: same as z for sensitive material above + 50microns
+		Double_t riVtxdM[NlVtxdM] = { 2.0,1.8, 1.6, 1.4, 
+			                        1.4, 1.6, 1.8, 2.0};	// Material layer R min in cm
+		Double_t rοVtxdM[NlVtxdM] = { 7.1,7.1,7.1,7.1, 
+			                        7.1,7.1,7.1,7.1 };	// Material layer R max in cm
+		Double_t lThVdM[NlVtxdM] =  { 43.7,43.7,43.7,43.7,
+									43.7,43.7,43.7,43.7 };		// Layer thickness in um -- Jim: 93.7 - 50 = 43.7 microns for Si
+		for (Int_t i = 0; i < NlVtxdM; i++)
+		{
+			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
+			fLyLabl[fNlay] = "VTXDSK";			// Layer label
+			fxMin[fNlay] = riVtxdM[i] * 1.e-2;	// Minimum dimension R for forward disk
+			fxMax[fNlay] = rοVtxdM[i]* 1.e-2;		// Maximum dimension R for forward disk
+			frPos[fNlay] = zVtxdM[i] * 1.e-2;	// R/z location of layer
+			fthLay[fNlay] = lThVdM[i] * 1.E-6;	// Thickness (meters)
+			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
+			fnmLay[fNlay] = 0;					// Number of measurements in layers (1D or 2D)
+			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0 = axial layer - Upper side
+			fstLayL[fNlay] = 0;				// Stereo angle (rad) - pi/2 = z layer - Lower side
+			fsgLayU[fNlay] = 0;				// Resolution Upper side (meters) - 0 = no measurement
+			fsgLayL[fNlay] = 0;				// Resolution Lower side (meters) - 0 = no measurement
+			fflLay[fNlay] = kFALSE;				// measurement flag = T, scattering only = F
+			fNlay++; fFlay++;
+		}
+	}
+
+
+	// Vertex disks - forward
+	if (fEnable[4])
+	{
+		const Int_t NlVtxfwdd = 6;	// 3 forward vertex disks on each side
+		Double_t zVtxfwdd[NlVtxfwdd] = {-83.2, -54.1, -20.7, 
+			                             20.7, 54.1, 83.2};		// Vertex layer z in cm
+		Double_t riVtxfwdd[NlVtxfwdd] = { 11.7, 7.6, 2.8, 
+			                              2.8, 7.6,11.7 };	// Vertex layer R min in cm
+		Double_t rοVtxfwdd[NlVtxfwdd] = { 16.6,16.6,16.6, 
+			                              16.6,16.6,16.6 };	// Vertex layer R max in cm
+		for (Int_t i = 0; i < NlVtxfwdd; i++)
+		{
+			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
+			fLyLabl[fNlay] = "VTXDSK_FWD";			// Layer label
+			fxMin[fNlay] = riVtxfwdd[i] * 1.e-2;	// Minimum dimension R for forward disk
+			fxMax[fNlay] = rοVtxfwdd[i] * 1.e-2;		// Maximum dimension R for forward disk
+ 			frPos[fNlay] = zVtxfwdd[i] * 1.e-2;	// R/z location of layer
+			fthLay[fNlay] = 50.E-6;				// Thickness (meters) - Jim: assume 50 microns thickness (ARCADIA/ATLASPIX3)
+			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
+			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
+			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0 = axial layer - Upper side
+			fstLayL[fNlay] = TMath::Pi() / 2.;	// Stereo angle (rad) - pi/2 = z layer - Lower side
+			fsgLayU[fNlay] = 3.E-6;				// Resolution Upper side (meters) - 0 = no measurement
+			fsgLayL[fNlay] = 3.E-6;			// Resolution Lower side (meters) - 0 = no measurement
+			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
+			fNlay++; fFlay++;
+			fNm++;
+		}
+		// Describe associated material -- Jim: asume 0.1% X0 per layer, i.e. 93.7microns per layer
+		const Int_t NlVtxdfwdM = 6;	// 3 forward vertex disks on each side
+		Double_t zVtxdfwdM[NlVtxdfwdM] = {-83.2-0.005, -54.1-0.005, -20.7-0.005, 
+			                             20.7+0.005, 54.1+0.005, 83.2+0.005};	// Material layer z in cm -- Jim: same as z for sensitive material above + 50microns
+		Double_t riVtxdfwdM[NlVtxdfwdM] = { 11.7, 7.6, 2.8, 
+			                              2.8, 7.6,11.7 };	// Material layer R min in cm
+		Double_t rοVtxdfwdM[NlVtxdfwdM] = { 16.6,16.6,16.6, 
+			                              16.6,16.6,16.6 };	// Material layer R max in cm
+		Double_t lThVdfwdM[NlVtxdfwdM] =  { 43.7,43.7,43.7,43.7,
+									    43.7,43.7,43.7,43.7 };		// Layer thickness in um -- Jim: 93.7 - 50 = 43.7 microns for Si
+		for (Int_t i = 0; i < NlVtxdfwdM; i++)
+		{
+			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
+			fLyLabl[fNlay] = "VTXDSK_FWD";			// Layer label
+			fxMin[fNlay] = riVtxdfwdM[i] * 1.e-2;	// Minimum dimension R for forward disk
+			fxMax[fNlay] = rοVtxdfwdM[i] * 1.e-2;		// Maximum dimension R for forward disk
+			frPos[fNlay] = zVtxdfwdM[i] * 1.e-2;	// R/z location of layer
+			fthLay[fNlay] = lThVdfwdM[i] * 1.E-6;	// Thickness (meters)
+			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
+			fnmLay[fNlay] = 0;					// Number of measurements in layers (1D or 2D)
+			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0 = axial layer - Upper side
+			fstLayL[fNlay] = 0;				// Stereo angle (rad) - pi/2 = z layer - Lower side
+			fsgLayU[fNlay] = 0;				// Resolution Upper side (meters) - 0 = no measurement
+			fsgLayL[fNlay] = 0;				// Resolution Lower side (meters) - 0 = no measurement
+			fflLay[fNlay] = kFALSE;				// measurement flag = T, scattering only = F
+			fNlay++; fFlay++;
+		}
+	}
+
+
+
+	//
+	// Tracker disks	
+	//
+	if (fEnable[5])
+	{
+		const Int_t NlItkd = 8;	// 8 tracker disks on each side
+		Double_t zItkd[NlItkd] = { -164.09, -135.55, -107.50, -78.89,
+									78.89,107.50, 135.55, 164.09 };		// Vertex layer z in cm
+		Double_t riItkd[NlItkd] = { 20.89, 20.89, 20.89, 20.89
+									20.89, 20.89, 20.89, 20.89  };	// Vertex layer R min in cm
+		Double_t roItkd[NlItkd] = { 125.36, 100.31, 75.14, 49.80,
+									49.80, 75.14, 100.31, 125.36 };		// Vertex layer R max in cm
+		for (Int_t i = 0; i < NlItkd; i++)
+		{
+			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
+			fLyLabl[fNlay] = "TRKDSK";			// Layer label
+			fxMin[fNlay] = riItkd[i] * 1.e-2;	// Minimum dimension R for forward disk
+			fxMax[fNlay] = roItkd[i] * 1.e-2;	// Maximum dimension R for forward disk
+			frPos[fNlay] = zItkd[i] * 1.e-2;	// R/z location of layer
+			fthLay[fNlay] =100.E-6;			// Thickness (meters) -- Jim: assume 100microns
+			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
+			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
+			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0 = axial layer - Upper side
+			fstLayL[fNlay] = TMath::Pi() / 2.;	// Stereo angle (rad) - pi/2 = z layer - Lower side
+			fsgLayU[fNlay] = 7.E-6;				// Resolution Upper side (meters) - 0 = no measurement
+			fsgLayL[fNlay] = 7.E-6;			// Resolution Lower side (meters) - 0 = no measurement
+			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
+			fNlay++; fFlay++;
+			fNm++;
+		}
+		// Describe associated material -- Jim: asume 0.3% X0 per layer, i.e. 281 microns per layer
+		const Int_t NlItkdM = 8;	// 8 tracker disks on each side
+		Double_t zItkdM[NlItkdM] = { -164.09-0.01, -135.55-0.01, -107.50-0.01, -78.89-0.01,
+									78.89+0.01,107.50+0.01, 135.55+0.01, 164.09+0.01 };			// Material layer z in cm -- Jim: same as z for sensitive material above + 100microns
+		Double_t riItkdM[NlItkdM] = { 20.89, 20.89, 20.89, 20.89,
+									20.89, 20.89, 20.89, 20.89  };		// Vertex layer R min in cm	
+		Double_t roItkdM[NlItkdM] = { 125.36, 100.31, 75.14, 49.80,
+									49.80, 75.14, 100.31, 125.36 };		// Vertex layer R max in cm
+		Double_t lThItdM[NlItkdM] = { 181., 181., 181., 181.,
+									  181., 181., 181., 181. };		// Layer thickness in um of Si -- Jim: 281 - 100 = 181 microns for Si
+		for (Int_t i = 0; i < NlItkdM; i++)
+		{
+			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
+			fLyLabl[fNlay] = "TRKDSK";			// Layer label
+			fxMin[fNlay] = riItkdM[i] * 1.e-2;	// Minimum dimension R for forward disk
+			fxMax[fNlay] = roItkdM[i] * 1.e-2;		// Maximum dimension R for forward disk
+			frPos[fNlay] = zItkdM[i] * 1.e-2;	// R/z location of layer
+			fthLay[fNlay] = lThItdM[i] * 1.E-6;	// Thickness (meters)
+			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
+			fnmLay[fNlay] = 0;					// Number of measurements in layers (1D or 2D)
+			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0 = axial layer - Upper side
+			fstLayL[fNlay] = 0;				// Stereo angle (rad) - pi/2 = z layer - Lower side
+			fsgLayU[fNlay] = 0;				// Resolution Upper side (meters) - 0 = no measurement
+			fsgLayL[fNlay] = 0;				// Resolution Lower side (meters) - 0 = no measurement
+			fflLay[fNlay] = kFALSE;				// measurement flag = T, scattering only = F
+			fNlay++; fFlay++;
 		}
 	}
 	//
-	// pre-shower radiators
-	if (fEnable[8])
-	{
-		const Int_t nPS = 2;
-		for (Int_t i = 0; i < nPS; i++)
-		{
-			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-			fLyLabl[fNlay] = "FRAD";				// Layer label
-			fxMin[fNlay] = 38 * 1e-2;			// Minimum dimension z for barrel  or R for forward
-			fxMax[fNlay] = 209.0 * 1.e-2;		// Maximum dimension z for barrel  or R for forward
-			frPos[fNlay] = pow(-1, i)*249.* 1.e-2;	// R/z location of layer
-			fthLay[fNlay] = .43E-2;				// Thickness (meters)
-			frlLay[fNlay] = 0.5612e-2;			// Radiation length (meters)
-			fnmLay[fNlay] = 0;					// Number of measurements in layers (1D or 2D)
-			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-			fstLayL[fNlay] = 0;					// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 0;					// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 0;					// Resolution Lower side (meters) - 0 = no measurement
-			fflLay[fNlay] = kFALSE;			// measurement flag = T, scattering only = F
-			fNlay++; fFlay++;
-			fNm++;
-		}
-		//
-		// Forw/backw. preshower
-		const Int_t NlPSd = 2;										// Assume 2 disk layers
-		Double_t zPSd[NlPSd] = { -2.55, 2.55 };					// z location in m
-		Double_t rinPSd[NlPSd] = { 0.39, 0.39 };					// Lower radius in m
-		Double_t rotPSd = 2.43;										// Outer radius in m
-		for (Int_t i = 0; i < NlPSd; i++)
-		{
-			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
-			fLyLabl[fNlay] = "FPRESH";			// Layer label
-			fxMin[fNlay] = rinPSd[i];			// Minimum dimension z for barrel  or R for forward
-			fxMax[fNlay] = rotPSd;			// Maximum dimension z for barrel  or R for forward
-			frPos[fNlay] = zPSd[i];			// R/z location of layer
-			fthLay[fNlay] = 0.02;				// Thickness (meters)
-			frlLay[fNlay] = 100.0e-2;			// Radiation length (meters)
-			fnmLay[fNlay] = 2;					// Number of measurements in layers (1D or 2D)
-			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
-			fstLayL[fNlay] = TMath::Pi() / 2.;	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
-			fsgLayU[fNlay] = 70.E-6;			// Resolution Upper side (meters) - 0 = no measurement
-			fsgLayL[fNlay] = 1.E-2;				// Resolution Lower side (meters) - 0 = no measurement
-			fflLay[fNlay] = kTRUE;				// measurement flag = T, scattering only = F
-			fNlay++; fFlay++;
-			fNm++;
-		}
-	}
+	//
+	//
+	// Magnet
+	//
+	ftyLay[fNlay] = 1;			// Layer type 1 = R (barrel) or 2 = z (forward/backward)
+	fLyLabl[fNlay] = "MAG";		// Layer label
+	fxMin[fNlay] = -2.793;		// Minimum dimension z for barrel  or R for forward -- Jim: ILC TDR Table II-6.1
+	fxMax[fNlay] = 2.793;			// Maximum dimension z for barrel  or R for forward  -- Jim: ILC TDR Table II-6.1
+	frPos[fNlay] = 2.731;		// R/z location of layer  -- Jim: ILC TDR Table II-6.1
+	fthLay[fNlay] = 0.38;		// Thickness (meters)  -- Jim: ILC TDR Table II-6.1 3.112-2.731 = 0.38m
+	frlLay[fNlay] = 6.58e-2;	// Radiation length (meters)
+	fnmLay[fNlay] = 0;			// Number of measurements in layers (1D or 2D)
+	fstLayU[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
+	fstLayL[fNlay] = 0;			// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
+	fsgLayU[fNlay] = 0.;		// Resolution Upper side (meters) - 0 = no measurement
+	fsgLayL[fNlay] = 0.;		// Resolution Lower side (meters) - 0 = no measurement
+	fflLay[fNlay] = kFALSE;		// measurement flag = T, scattering only = F
+	fNlay++; fBlay++;
 
 	cout << "Geometry created with " << fNlay << "/" << fNm << " layers" << endl;
 }
@@ -477,9 +480,8 @@ Double_t *SolGeom::FracX0(Double_t theta)
 {
 	//
 	// Calculates amount of material crossed by a straight track at a polar angle theta
-	// for each subdetector:
-	// 0: Pipe, 1: VTXLOW, 2: VTXHIGH, 3: DCHCANI, 4: DCH, 5: DCHCANO, 6: BSILWRP, 7: MAG,
-	// 8: BPRESH, 9: VTXDSK, 10: DCHWALL, 11: FSILWRP, 12: FRAD, 13: FPRESH
+	// for each subdetector: Jim
+	// 0: Pipe, 1: VTX, 2: TRK, 3: VTXDSK, 4: VTXDSK_FWD, 5: TRKDSK, 6: MAG,
 	//
 	Double_t *Mat;
 	Mat = new Double_t[fNdty];
@@ -626,7 +628,7 @@ void SolGeom::Draw()
 	beam->SetLineStyle(9);
 	beam->Draw("SAME");
 	// Magnet
-	TPave *sol = new TPave(-2.5, 2.1, 2.5, 2.4, 0, "");
+	TPave *sol = new TPave(-2.5, 2.2, 2.5, 2.3, 0, "");
 	sol->SetFillColor(30);
 	sol->Draw("SAME");
 	//
@@ -661,39 +663,30 @@ void SolGeom::Draw()
 	TF1   *fn[lMax];
 	Int_t il = 0; 
 	Int_t ig = 0;
-	for (Int_t i = 0; i < fBlay; i++)
+	for (Int_t i = 0; i < fNlay; i++)
 	{
 		if (fLyLabl[i] == "DCH")		// Drift chamber layers (hypeboloids)
 		{
 				char lab[10]; 
 				Int_t stat;
 				stat = sprintf(lab, "fun%d", ig);
-				fn[ig] = new TF1(lab, this, &SolGeom::StereoHyp, lxMin(i), lxMax(i), 2, "SolGeom","StereoHyp");
+				fn[ig] = new TF1(lab, this, &SolGeom::StereoHyp, lxMin(i), lxMax(i), 3, "SolGeom","StereoHyp");
 				fn[ig]->SetParameter(0, lPos(i));
 				fn[ig]->SetParameter(1, lStU(i));
+				fn[ig]->SetParameter(2, (Double_t) i);
 				fn[ig]->SetLineColor(kBlue);
 				fn[ig]->Draw("SAME");
 				ig++;
 		}
 		else
 		{
-			ln[il] = new TLine(lxMin(i), lPos(i), lxMax(i), lPos(i));
+			if(ftyLay[i] == 1)ln[il] = new TLine(lxMin(i), lPos(i), lxMax(i), lPos(i));
+			else ln[il] = new TLine(lPos(i), lxMin(i), lPos(i), lxMax(i));
 			ln[il]->SetLineColor(kBlack);
 			if (isMeasure(i))ln[il]->SetLineColor(kRed);
 			ln[il]->Draw("SAME");
 			il++;
 		}
-	}
-	//
-	// Forward/backward geometry
-	//
-	for (Int_t i = fBlay; i < fNlay; i++)
-	{
-		ln[il] = new TLine(lPos(i), lxMin(i), lPos(i), lxMax(i));
-		ln[il]->SetLineColor(kBlack);
-		if (isMeasure(i))ln[il]->SetLineColor(kRed);
-		ln[il]->Draw("SAME");
-		il++;
 	}
 }
 //
@@ -701,7 +694,8 @@ Double_t SolGeom::StereoHyp(Double_t *x, Double_t *p)
 {
 	Double_t R   = p[0];
 	Double_t tg  = TMath::Tan(p[1]);
-	Double_t r = TMath::Sqrt(R*R - lxMax(50)*lxMax(50)*tg*tg);
+	Int_t i = (Int_t)p[2];
+	Double_t r = TMath::Sqrt(R*R - lxMax(i)*lxMax(i)*tg*tg);
 	Double_t z   = x[0];
 	//
 	return TMath::Sqrt(r*r + z*z*tg*tg);
