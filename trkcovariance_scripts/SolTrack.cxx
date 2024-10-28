@@ -1,5 +1,5 @@
 
-#include "SolGeom.h"
+#include "../geometry_scripts/SolGeom.h"
 #include "SolTrack.h"
 #include <TString.h>
 #include <TMath.h>

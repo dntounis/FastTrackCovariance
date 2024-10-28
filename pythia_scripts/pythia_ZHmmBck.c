@@ -25,8 +25,8 @@
 #include <TLegend.h>
 #include <iostream>
 //#include "SolGeom.h"
-#include "SolGridCov.h"
-#include "ObsTrk.h"
+#include "../trkcovariance_scripts/SolGridCov.h"
+#include "../trkcovariance_scripts/ObsTrk.h"
 
 void ZHmmBck(Int_t nev  = 100, TString fname = "ZHmm.root", Int_t ndeb = 1)
 {

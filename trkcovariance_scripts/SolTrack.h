@@ -4,7 +4,7 @@
 //
 #include <TMath.h>
 #include <TMatrixDSym.h>
-#include "SolGeom.h"
+#include "../geometry_scripts/SolGeom.h"
 #include <TGraph.h>
 
 using namespace std; 

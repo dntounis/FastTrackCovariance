@@ -8,8 +8,8 @@
 #include <TGraph.h>
 #include <TGraphErrors.h>
 #include <iostream>
-#include "SolGeom.h"
-#include "SolTrack.h"
+#include "geometry_scripts/SolGeom.h"
+#include "trkcovariance_scripts/SolTrack.h"
 
 //
 void PlotGrid()

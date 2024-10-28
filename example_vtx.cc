@@ -1,7 +1,7 @@
 #include <iostream>
-#include "SolGeom.h"
-#include "SolGridCov.h"
-#include "ObsTrk.h"
+#include "geometry_scripts/SolGeom.h"
+#include "trkcovariance_scripts/SolGridCov.h"
+#include "trkcovariance_scripts/ObsTrk.h"
 
 #include "TVector3.h"
 #include "TLorentzVector.h"
@@ -485,5 +485,5 @@ int main() {
   cnv->cd(4);
   hChi2->Fit("fch");
   hChi2->Draw();
-
+  cnv->SaveAs("vtx_residuals.pdf"); //Jim
 }

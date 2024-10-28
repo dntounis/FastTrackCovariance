@@ -8,8 +8,8 @@
 #include <TF1.h>
 #include <TCanvas.h>
 #include <iostream>
-#include "SolGridCov.h"
-#include "ObsTrk.h"
+#include "trkcovariance_scripts/SolGridCov.h"
+#include "trkcovariance_scripts/ObsTrk.h"
 //
 TVectorD Fillf(TVectorD par, TVectorD xin)
 {

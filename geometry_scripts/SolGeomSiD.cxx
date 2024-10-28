@@ -8,8 +8,11 @@
 #include <TF1.h>
 #include <TString.h>
 #include "SolGeom.h"
-#include "SolTrack.h"
+#include "../trkcovariance_scripts/SolTrack.h"
 #include <TLegend.h>
+#include <TGaxis.h>
+#include <TText.h>
+
 
 SolGeom::SolGeom()
 {
@@ -58,11 +61,11 @@ SolGeom::SolGeom(Bool_t *OK)
 	}
 	for (Int_t i=0; i < k; i++)cout << "i = " << i << ", Detector = " << fDtype[i]<<endl;
 }
-SolGeom::SolGeom(char *fname)
+SolGeom::SolGeom(char *fname, double *B)
 {
 	SolGeoInit();
 	for (Int_t i = 0; i < fNdet; i++)fEnable[i] = kTRUE;	// default is everything enabled
-	GeoRead(fname);
+	GeoRead(fname,B);
 	TString OldLab = " "; Int_t k = 0;
 	for (Int_t i = 0; i < fNlay; i++)
 	{
@@ -529,8 +532,9 @@ Double_t *SolGeom::FracX0(Double_t theta)
 }
 //
 // Read geometry
-void SolGeom::GeoRead(char *fname)
+void SolGeom::GeoRead(char *fname, char *B)
 {
+	fB = B;
 	char strng[200];
 	int nbytes = 200;
 	FILE *fdata = fopen(fname, "r");
@@ -581,7 +585,7 @@ void SolGeom::GeoRead(char *fname)
 
 	}
 	fclose(fdata);
-	cout << "SolGeom::GeoRead completed with " << fNlay << " layers input" << endl;
+	cout << "SolGeom::GeoRead completed with " << fNlay << " layers input" << " and magnetic field " << fB << " T" << endl;
 }
 //
 // Destructor

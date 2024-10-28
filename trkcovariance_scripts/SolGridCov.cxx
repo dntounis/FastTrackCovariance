@@ -8,7 +8,7 @@
 #include <TMatrixDSymEigen.h>
 #include <TTree.h>
 #include "SolGridCov.h"
-#include "SolGeom.h"
+#include "../geometry_scripts/SolGeom.h"
 #include "SolTrack.h"
 //
 //

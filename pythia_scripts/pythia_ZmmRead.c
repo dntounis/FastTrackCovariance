@@ -22,9 +22,9 @@
 #include <TDatabasePDG.h>
 #include <TCanvas.h>
 #include <iostream>
-#include "SolGeom.h"
-#include "SolGridCov.h"
-#include "ObsTrk.h"
+#include "../geometry_files/SolGeom.h"
+#include "../trkcovariance_scripts/SolGridCov.h"
+#include "../trkcovariance_scripts/ObsTrk.h"
 
 void ZmmRead(Int_t nev  = 100, TString fname = "PyOut.root", Int_t ndeb = 1)
 {

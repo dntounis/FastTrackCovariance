@@ -1,7 +1,7 @@
 #include <iostream>
-#include "SolGeom.h"
-#include "SolGridCov.h"
-#include "ObsTrk.h"
+#include "geometry_scripts/SolGeom.h"
+#include "trkcovariance_scripts/SolGridCov.h"
+#include "trkcovariance_scripts/ObsTrk.h"
 
 #include "TVector3.h"
 #include "TLorentzVector.h"
@@ -44,7 +44,6 @@ int main() {
 
   // apply track Resolution
 
-  /*
   TVector3 tX(0., 0., 0.);
   TLorentzVector p4;
   Double_t pt = 10.;
@@ -70,5 +69,5 @@ int main() {
 
   cout<<p4.Pt()<<","<<p4.Eta() <<","<<p4.Phi() <<","<<p4.E() <<endl;
   cout<<p4obs.Pt()<<","<<p4obs.Eta() <<","<<p4obs.Phi() <<","<<p4obs.E() <<endl;
-  */
+  
 }

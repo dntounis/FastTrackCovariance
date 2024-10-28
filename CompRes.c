@@ -10,9 +10,9 @@
 #include <THStack.h>
 #include <TFile.h>
 #include <iostream>
-#include "SolGeom.h"
-#include "SolTrack.h"
-#include "SolGridCov.h"
+#include "geometry_scripts/SolGeom.h"
+#include "trkcovariance_scripts/SolTrack.h"
+#include "trkcovariance_scripts/SolGridCov.h"
 //
 void CompRes(Double_t Ang)
 {
@@ -73,7 +73,7 @@ void CompRes(Double_t Ang)
 		1,					// Forw. VTX pixel layers
 		1,					// Forw. Si wrapper
 		1};					// Forw. pre-shower
-	G = new SolGeom("GeoIDEA_GT.txt");	// Geometry with selected detectors
+	G = new SolGeom("GeoIDEA_GT.txt",2.0);	// Geometry with selected detectors
 	G->Draw();				// Draw R-z geometry
 	//char* fname = "GeoIDEA_BASE.txt";
 	//G->GeoPrint(fname);
@@ -93,6 +93,7 @@ void CompRes(Double_t Ang)
 	SolTrack *trk = new SolTrack(x, p, G);	// Initialize track
 	TGraph *gr = trk->TrkPlot();			// graph intersection with layers
 	gr->Draw("PLSAME");						// plot track
+	cc -> SaveAs("IDEA_geometry_track.pdf");
 	//
 	// End track plot
 	//*********************************************************
@@ -146,6 +147,7 @@ void CompRes(Double_t Ang)
 	lg->AddEntry(hSilWrp, "Silicon wrapper", "f");
 	hMat->SetMaximum(30.);
 	hMat->Draw(); lg->Draw();
+	cmat->SaveAs("IDEA_material_tracking.pdf");
 	//
 	//******************************************************
 	// Compare track parameter resolutions vs pt and theta *
@@ -237,6 +239,7 @@ void CompRes(Double_t Ang)
 	grth->SetMarkerSize(0.5);
 	grth->SetMarkerStyle(kFullCircle);
 	grth->Draw("PLSAME");						// Estimated resolution
+	resol->SaveAs("IDEA_resolution_tracking.pdf");
 	//
 	//***************************************************
 	// Repeat using interpolation                       *
@@ -331,5 +334,6 @@ void CompRes(Double_t Ang)
 	grth->SetMarkerSize(0.5);
 	ggrth->SetMarkerStyle(kFullCircle);
 	ggrth->Draw("LSAME");						// Estimated resolution
+	resol1->SaveAs("IDEA_resolution_tracking_grid.pdf");
 }
 

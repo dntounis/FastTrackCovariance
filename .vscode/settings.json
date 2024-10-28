@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "soltrack.h": "c",
+        "solgridcov.h": "c",
+        "obstrk.h": "c"
+    }
+}

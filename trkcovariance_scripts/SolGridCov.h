@@ -4,7 +4,7 @@
 #include <TVectorD.h>
 #include <TMatrixDSym.h>
 #include <TString.h>
-#include "SolGeom.h"
+#include "../geometry_scripts/SolGeom.h"
 
 using namespace std;
 

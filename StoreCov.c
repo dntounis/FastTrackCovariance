@@ -14,9 +14,9 @@
 #include <TMatrixDSymEigen.h>
 #include <TTree.h>
 #include <TString.h>
-#include "SolGeom.h"
-#include "SolTrack.h"
-#include "SolGridCov.h"
+#include "geometry_scripts/SolGeom.h"
+#include "trkcovariance_scripts/SolTrack.h"
+#include "trkcovariance_scripts/SolGridCov.h"
 //
 //
 //

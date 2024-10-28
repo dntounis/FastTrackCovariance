@@ -47,13 +47,13 @@ private:
 	Double_t StereoHyp(Double_t *x, Double_t *p);
 	void SolGeoInit();
 	void SolGeoFill();
-	void GeoRead(char *fname);
+	void GeoRead(char *fname, double B);
 public:
 	//
 	// Constructors
 	SolGeom();				// Create standard geometry from scratch
 	SolGeom(Bool_t *OK);		// Create standard geometry with detector selection
-	SolGeom(char *fname);	// Read in geometry from file
+	SolGeom(char *fname, double B);	// Read in geometry from file #Jim: and magnetic field!!
 	// Destructor
 	~SolGeom();
 	// Accessors
