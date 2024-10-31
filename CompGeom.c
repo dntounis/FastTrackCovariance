@@ -184,6 +184,7 @@ void CompGeom(Double_t Ang)
 		Bool_t MS  = kTRUE;		// Enable multiple scattering
 		tr_id->CovCalc(Res,MS);					// Calculate covariance
 		spt_id[k] = tr_id->s_pt();							// Dpt/pt
+		//spt_id[k] = tr_id->s_pt()/pt[k];							// Dpt/pt^2 -Jim: change this to sigma pt/pt^2 to match what is shown in ILC TDR - 2*sigma(pt)/pt^2
 		sd0_id[k] = tr_id->s_D()*1e6;							// D  res. - change to microns
 		sz0_id[k] = tr_id->s_z0()*1e6;						// z0 res. - change to microns
 		sth_id[k] = tr_id->s_ct() / (1 + pow(tr_id->ct(), 2));	// theta resolution
@@ -193,11 +194,13 @@ void CompGeom(Double_t Ang)
 		MS  = kTRUE;
 		tr_idnw->CovCalc(Res, MS);					// Calculate covariance
 		spt_idnw[k] = tr_idnw->s_pt();							// Dpt/pt
+		//spt_idnw[k] = tr_idnw->s_pt()/pt[k];							// Dpt/pt^2 -Jim: change this to sigma pt/pt^2 to match what is shown in ILC TDR - 2*sigma(pt)/pt^2
 		//
 		Res = kFALSE;
 		MS = kTRUE;
 		tr_id->CovCalc(Res,MS);					// Calculate covariance with only MS
 		sptms_id[k] = tr_id->s_pt();							// Dpt/pt
+		//sptms_id[k] = tr_id->s_pt()/pt[k];							// Dpt/pt^2 -Jim: change this to sigma pt/pt^2 to match what is shown in ILC TDR - 2*sigma(pt)/pt^2
 
 		
 		// Fill CLD arrays
@@ -206,12 +209,14 @@ void CompGeom(Double_t Ang)
 		MS  = kTRUE;		// Enable multiple scattering
 		tr_cl->CovCalc(Res,MS);					// Calculate covariance
 		spt_cl[k] = tr_cl->s_pt();							// Dpt/pt
+		//spt_cl[k] = tr_cl->s_pt()/pt[k];					// Dpt/pt^2 -Jim: change this to sigma pt/pt^2 to match what is shown in ILC TDR - 2*sigma(pt)/pt^2
 		sd0_cl[k] = tr_cl->s_D()*1e6;							// D  res. - change to microns
 		sz0_cl[k] = tr_cl->s_z0()*1e6;						// z0 res. - change to microns
 		sth_cl[k] = tr_cl->s_ct() / (1 + pow(tr_cl->ct(), 2));	// theta resolution
 		Res = kFALSE;
 		tr_cl->CovCalc(Res,MS);					// Calculate covariance with only MS
 		sptms_cl[k] = tr_cl->s_pt();							// Dpt/pt
+		//sptms_cl[k] = tr_cl->s_pt()/pt[k];					// Dpt/pt^2 -Jim: change this to sigma pt/pt^2 to match what is shown in ILC TDR - 2*sigma(pt)/pt^2
 
 
 		// Fill SiD arrays
@@ -220,12 +225,15 @@ void CompGeom(Double_t Ang)
 		MS  = kTRUE;		// Enable multiple scattering
 		tr_sid->CovCalc(Res,MS);					// Calculate covariance
 		spt_sid[k] = tr_sid->s_pt();							// Dpt/pt
+		//spt_sid[k] = tr_sid->s_pt()/pt[k];					// Dpt/pt^2 -Jim: change this to sigma pt/pt^2 to match what is shown in ILC TDR - 2*sigma(pt)/pt^2
 		sd0_sid[k] = tr_sid->s_D()*1e6;							// D  res. - change to microns
 		sz0_sid[k] = tr_sid->s_z0()*1e6;						// z0 res. - change to microns
 		sth_sid[k] = tr_sid->s_ct() / (1 + pow(tr_sid->ct(), 2));	// theta resolution
 		Res = kFALSE;
 		tr_sid->CovCalc(Res,MS);					// Calculate covariance with only MS
 		sptms_sid[k] = tr_sid->s_pt();							// Dpt/pt
+		//sptms_sid[k] = tr_sid->s_pt()/pt[k];					// Dpt/pt^2 -Jim: change this to sigma pt/pt^2 to match what is shown in ILC TDR - 2*sigma(pt)/pt^2
+
 	}
 	//
 	// Compare pt resolution
@@ -235,6 +243,7 @@ void CompGeom(Double_t Ang)
 	grpt_cl->SetLineColor(kRed);
 	grpt_cl->SetMarkerColor(kRed);
 	grpt_cl->SetTitle("#sigma_{pt}/pt");
+	//grpt_cl->SetTitle("#sigma_{pt}/pt^2 (GeV^{-1})");
 	grpt_cl->SetMinimum(0.0);
 	grpt_cl->GetXaxis()->SetTitle("pt (GeV)");
 	grpt_cl->Draw("APL");
@@ -243,6 +252,7 @@ void CompGeom(Double_t Ang)
 	grptms_cl->SetMarkerColor(kRed);
 	grptms_cl->SetLineStyle(7);
 	grptms_cl->SetTitle("#sigma_{pt}/pt");
+	//grptms_cl->SetTitle("#sigma_{pt}/pt^2 (GeV^{-1})");
 	grptms_cl->SetMinimum(0.0);
 	grptms_cl->GetXaxis()->SetTitle("pt (GeV)");
 	grptms_cl->Draw("SAME");
@@ -251,6 +261,7 @@ void CompGeom(Double_t Ang)
 	grpt_id->SetLineColor(kBlue);
 	grpt_id->SetMarkerColor(kBlue);
 	grpt_id->SetTitle("#sigma_{pt}/pt");
+	//grpt_id->SetTitle("#sigma_{pt}/pt^2 (GeV^{-1})");
 	grpt_id->SetMinimum(0.0);
 	grpt_id->GetXaxis()->SetTitle("pt (GeV)");
 	grpt_id->Draw("SAME");
@@ -259,6 +270,7 @@ void CompGeom(Double_t Ang)
 	grptms_id->SetMarkerColor(kBlue);
 	grptms_id->SetLineStyle(7);
 	grptms_id->SetTitle("#sigma_{pt}/pt");
+	//grptms_id->SetTitle("#sigma_{pt}/pt^2 (GeV^{-1})");
 	grptms_id->SetMinimum(0.0);
 	grptms_id->GetXaxis()->SetTitle("pt (GeV)");
 	grptms_id->Draw("SAME");
@@ -267,6 +279,7 @@ void CompGeom(Double_t Ang)
 	grpt_sid->SetLineColor(kGreen);
 	grpt_sid->SetMarkerColor(kGreen);
 	grpt_sid->SetTitle("#sigma_{pt}/pt");
+	//grpt_sid->SetTitle("#sigma_{pt}/pt^2 (GeV^{-1})");
 	grpt_sid->SetMinimum(0.0);
 	grpt_sid->GetXaxis()->SetTitle("pt (GeV)");
 	grpt_sid->Draw("SAME");
@@ -275,6 +288,7 @@ void CompGeom(Double_t Ang)
 	grptms_sid->SetMarkerColor(kGreen);
 	grptms_sid->SetLineStyle(7);
 	grptms_sid->SetTitle("#sigma_{pt}/pt");
+	//grptms_sid->SetTitle("#sigma_{pt}/pt^2 (GeV^{-1})");
 	grptms_sid->SetMinimum(0.0);
 	grptms_sid->GetXaxis()->SetTitle("pt (GeV)");
 	grptms_sid->Draw("SAME");

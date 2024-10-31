@@ -62,7 +62,11 @@ public:
 	Double_t s_D()    { return TMath::Sqrt(fCov(0, 0)); }
 	Double_t s_phi0() { return TMath::Sqrt(fCov(1, 1)); }
 	Double_t s_C()    { return TMath::Sqrt(fCov(2, 2)); }
-	Double_t s_pt()   { return 2 * s_C()*pt() / (0.2998*fG->B()); }	// Dpt/pt
+	Double_t s_pt()   { return 2 * s_C()*pt() / (0.2998*fG->B()); }	// sigma pt/pt
+	// Jim: change this to sigma pt/pt^2 to match what is shown in ILC TDR - 2*sigma(pt)/pt^2
+	//Double_t s_pt()   { return 2 * s_C() / (0.2998*fG->B()); }	
+
+
 	Double_t s_z0()   { return TMath::Sqrt(fCov(3, 3)); }
 	Double_t s_ct()   { return TMath::Sqrt(fCov(4, 4)); }
 	//

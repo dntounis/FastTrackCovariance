@@ -73,7 +73,9 @@ void CompRes(Double_t Ang)
 		1,					// Forw. VTX pixel layers
 		1,					// Forw. Si wrapper
 		1};					// Forw. pre-shower
-	G = new SolGeom("GeoIDEA_GT.txt",2.0);	// Geometry with selected detectors
+	//G = new SolGeom("GeoIDEA_GT.txt",2.0);	// Geometry with selected detectors
+	G = new SolGeom("geometry_files/GeoIDEA_GT.txt",2.0);	// Geometry with selected detectors
+	
 	G->Draw();				// Draw R-z geometry
 	//char* fname = "GeoIDEA_BASE.txt";
 	//G->GeoPrint(fname);

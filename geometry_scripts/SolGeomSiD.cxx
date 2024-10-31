@@ -61,7 +61,7 @@ SolGeom::SolGeom(Bool_t *OK)
 	}
 	for (Int_t i=0; i < k; i++)cout << "i = " << i << ", Detector = " << fDtype[i]<<endl;
 }
-SolGeom::SolGeom(char *fname, double *B)
+SolGeom::SolGeom(char *fname, double B)
 {
 	SolGeoInit();
 	for (Int_t i = 0; i < fNdet; i++)fEnable[i] = kTRUE;	// default is everything enabled
@@ -178,11 +178,13 @@ void SolGeom::SolGeoFill()
 
 
 		// Describe associated material -- Jim: asume 0.1% X0 per layer, i.e. 93.7microns per layer
-		const Int_t NlVtxM = 5;
+		// Also add support structure for the vertex detector
+		const Int_t NlVtxM = 7;
 
-		Double_t rVtxM[NlVtxM] = { 1.4+0.0050, 2.2+0.0050, 3.5+0.0050, 4.8+0.0050, 6.0+0.0050 };		// Vertex layer radii in cm -- Jim: assume r for vtx sensitive material above + sensor width of 50microns
-		Double_t lVtxM[NlVtxM] = { 6.3,6.3,6.3,6.3,6.3 };		// Vertex layer half length in cm
-		Double_t lThkM[NlVtxM] = { 43.7,43.7,43.7,43.7,43.7 };	// Layer thickness in um -- Jim: 93.7 - 50 = 43.7 microns for Si
+		Double_t rVtxM[NlVtxM] = { 1.4+0.0050, 2.2+0.0050, 3.5+0.0050, 4.8+0.0050, 6.0+0.0050, 16.6, 16.6+1.5 };		// Vertex layer radii in cm -- Jim: assume r for vtx sensitive material above + sensor width of 50microns
+		Double_t lVtxM[NlVtxM] = { 6.3,6.3,6.3,6.3,6.3, 88.2, 88.2+1.5 };		// Vertex layer half length in cm
+		Double_t lThkM[NlVtxM] = { 43.7,43.7,43.7,43.7,43.7,260.0,260.0 };	// Layer thickness in um -- Jim: 93.7 - 50 = 43.7 microns for Si, and 0.26mm for support structure
+		Double_t X0VtxM[NlVtxM] = { 9.370e-2,9.370e-2,9.370e-2,9.370e-2,9.370e-2, 19.320e-2, 19.320e-2 };	// Radiation length (meters) for Si and carbon for support structure
 		for (Int_t i = 0; i < NlVtxM; i++)
 		{
 			ftyLay[fNlay] = 1;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
@@ -191,7 +193,7 @@ void SolGeom::SolGeoFill()
 			fxMax[fNlay] = lVtxM[i] * 1.e-2;	// Maximum dimension z for barrel  or R for forward
 			frPos[fNlay] = rVtxM[i] * 1.e-2;	// R/z location of layer
 			fthLay[fNlay] = lThkM[i] * 1.E-6;	// Thickness (meters)
-			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
+			frlLay[fNlay] = X0VtxM[i];			// Radiation length (meters)
 			fnmLay[fNlay] = 0;					// Number of measurements in layers (1D or 2D)
 			fstLayU[fNlay] = 0;					// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Upper side
 			fstLayL[fNlay] = 0;	// Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
@@ -348,16 +350,18 @@ void SolGeom::SolGeoFill()
 			fNlay++; fFlay++;
 			fNm++;
 		}
-		// Describe associated material -- Jim: asume 0.1% X0 per layer, i.e. 93.7microns per layer
-		const Int_t NlVtxdfwdM = 6;	// 3 forward vertex disks on each side
-		Double_t zVtxdfwdM[NlVtxdfwdM] = {-83.2-0.005, -54.1-0.005, -20.7-0.005, 
-			                             20.7+0.005, 54.1+0.005, 83.2+0.005};	// Material layer z in cm -- Jim: same as z for sensitive material above + 50microns
-		Double_t riVtxdfwdM[NlVtxdfwdM] = { 11.7, 7.6, 2.8, 
-			                              2.8, 7.6,11.7 };	// Material layer R min in cm
-		Double_t rοVtxdfwdM[NlVtxdfwdM] = { 16.6,16.6,16.6, 
-			                              16.6,16.6,16.6 };	// Material layer R max in cm
-		Double_t lThVdfwdM[NlVtxdfwdM] =  { 43.7,43.7,43.7,
-									        43.7,43.7,43.7 };		// Layer thickness in um -- Jim: 93.7 - 50 = 43.7 microns for Si
+		// Describe associated material -- Jim: asume 0.1% X0 per layer, i.e. 93.7microns per layer and include support structure
+		const Int_t NlVtxdfwdM = 10;	// 3 forward vertex disks on each side
+		Double_t zVtxdfwdM[NlVtxdfwdM] = {-88.2-1.5,-88.2,-83.2-0.005, -54.1-0.005, -20.7-0.005, 
+			                             20.7+0.005, 54.1+0.005, 83.2+0.005,88.2,88.2+1.5};	// Material layer z in cm -- Jim: same as z for sensitive material above + 50microns
+		Double_t riVtxdfwdM[NlVtxdfwdM] = { 9.1,9.1,11.7, 7.6, 2.8, 
+			                              2.8, 7.6,11.7,9.1,9.1 };	// Material layer R min in cm
+		Double_t rοVtxdfwdM[NlVtxdfwdM] = {16.6,16.6, 16.6,16.6,16.6, 
+			                              16.6,16.6,16.6,16.6,16.6 };	// Material layer R max in cm
+		Double_t lThVdfwdM[NlVtxdfwdM] =  { 260.,260.,43.7,43.7,43.7,
+									        43.7,43.7,43.7,260.,260. };		// Layer thickness in um -- Jim: 93.7 - 50 = 43.7 microns for Si and 0.26mm for support structure
+		Double_t X0VdfwdM[NlVtxdfwdM] = { 19.320e-2,19.320e-2,9.370e-2,9.370e-2,9.370e-2,
+									        9.370e-2,9.370e-2,9.370e-2,19.320e-2,19.320e-2 };	// Radiation length (meters) for Si and carbon for support structure
 		for (Int_t i = 0; i < NlVtxdfwdM; i++)
 		{
 			ftyLay[fNlay] = 2;					// Layer type 1 = R (barrel) or 2 = z (forward/backward)
@@ -366,7 +370,7 @@ void SolGeom::SolGeoFill()
 			fxMax[fNlay] = rοVtxdfwdM[i] * 1.e-2;		// Maximum dimension R for forward disk
 			frPos[fNlay] = zVtxdfwdM[i] * 1.e-2;	// R/z location of layer
 			fthLay[fNlay] = lThVdfwdM[i] * 1.E-6;	// Thickness (meters)
-			frlLay[fNlay] = 9.370e-2;			// Radiation length (meters)
+			frlLay[fNlay] = X0VdfwdM[i];			// Radiation length (meters)
 			fnmLay[fNlay] = 0;					// Number of measurements in layers (1D or 2D)
 			fstLayU[fNlay] = 0.0;				// Stereo angle (rad) - 0 = axial layer - Upper side
 			fstLayL[fNlay] = 0;				// Stereo angle (rad) - pi/2 = z layer - Lower side
@@ -384,7 +388,7 @@ void SolGeom::SolGeoFill()
 	//
 	if (fEnable[5])
 	{
-		const Int_t NlItkd = 8;	// 8 tracker disks on each side
+		const Int_t NlItkd = 8;	// 4 tracker disks on each side
 		Double_t zItkd[NlItkd] = { -164.09, -135.55, -107.50, -78.89,
 									78.89,107.50, 135.55, 164.09 };		// Vertex layer z in cm
 		Double_t riItkd[NlItkd] = { 20.89, 20.89, 20.89, 20.89,
@@ -410,7 +414,7 @@ void SolGeom::SolGeoFill()
 			fNm++;
 		}
 		// Describe associated material -- Jim: asume 0.3% X0 per layer, i.e. 281 microns per layer
-		const Int_t NlItkdM = 8;	// 8 tracker disks on each side
+		const Int_t NlItkdM = 8;	// 4 tracker disks on each side
 		Double_t zItkdM[NlItkdM] = { -164.09-0.01, -135.55-0.01, -107.50-0.01, -78.89-0.01,
 									78.89+0.01,107.50+0.01, 135.55+0.01, 164.09+0.01 };			// Material layer z in cm -- Jim: same as z for sensitive material above + 100microns
 		Double_t riItkdM[NlItkdM] = { 20.89, 20.89, 20.89, 20.89,
@@ -532,7 +536,7 @@ Double_t *SolGeom::FracX0(Double_t theta)
 }
 //
 // Read geometry
-void SolGeom::GeoRead(char *fname, char *B)
+void SolGeom::GeoRead(char *fname, double B)
 {
 	fB = B;
 	char strng[200];
